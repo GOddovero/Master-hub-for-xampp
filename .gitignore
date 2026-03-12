@@ -1,0 +1,4 @@
+projects.json
+logos/*.png
+!logos/goh1.png
+!logos/*.svg

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Master Hub</title>
+  <desc id="desc">Generic icon for the local project hub.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#a3e635" />
+      <stop offset="100%" stop-color="#38bdf8" />
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bg)" />
+  <path d="M28 40h26c8.837 0 16 7.163 16 16v32H44c-8.837 0-16-7.163-16-16V40Z" fill="url(#accent)" />
+  <path d="M58 40h26c8.837 0 16 7.163 16 16v32H74c-8.837 0-16-7.163-16-16V40Z" fill="#f8fafc" fill-opacity="0.9" />
+  <path d="M44 54h18v20H44zM66 54h18v20H66z" fill="#111827" fill-opacity="0.9" />
+  <circle cx="92" cy="92" r="10" fill="#fb923c" />
+</svg>

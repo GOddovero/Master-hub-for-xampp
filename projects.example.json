@@ -1,0 +1,31 @@
+{
+  "_meta": {
+    "version": 1,
+    "notes": "Copy this file as projects.json for your local environment. Each key must match a folder inside htdocs. logo can be a file inside master-hub/logos, a relative path, or a URL."
+  },
+  "dashboard": { "hidden": true },
+  "xampp": { "hidden": true },
+  "img": { "hidden": true },
+  "webalizer": { "hidden": true },
+  "my_php_app": {
+    "title": "My PHP App",
+    "description": "Internal application built with PHP and MySQL",
+    "logo": "hub-mark.svg",
+    "group": "Work",
+    "tags": ["php", "mysql"]
+  },
+  "demo_store": {
+    "title": "Demo Store",
+    "description": "Sample project for a local ecommerce site",
+    "logo": "hub-mark.svg",
+    "group": "Demos",
+    "tags": ["demo", "catalog"]
+  },
+  "client_landing": {
+    "title": "Client Landing",
+    "description": "Sample static site",
+    "logo": "hub-mark.svg",
+    "group": "Clients",
+    "tags": ["html", "css"]
+  }
+}
