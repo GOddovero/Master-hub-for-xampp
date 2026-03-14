@@ -131,6 +131,15 @@ $dash_url = '/dashboard/';
 $phpmyadmin_url = rtrim(current_origin(), '/') . '/phpmyadmin/';
 $hub_base_url = current_base_url();
 $default_logo = 'logos/hub-mark.svg';
+
+$all_groups = [];
+foreach ($projects as $dir) {
+	if (!empty($config[$dir]['group'])) {
+		$all_groups[$config[$dir]['group']] = true;
+	}
+}
+$all_groups = array_keys($all_groups);
+sort($all_groups);
 ?>
 <!doctype html>
 <html lang="en">
@@ -981,6 +990,116 @@ $default_logo = 'logos/hub-mark.svg';
 			border-radius: 3px;
 			border: 1px solid var(--border)
 		}
+
+		/* ── MODAL ────────────────────────────────────────────────── */
+		.modal {
+			padding: 0;
+			border: 1px solid var(--border-hi);
+			border-radius: var(--r);
+			background: var(--bg-card);
+			color: var(--text);
+			margin: auto;
+			width: 100%;
+			max-width: 480px;
+			box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05) inset;
+		}
+		.modal::backdrop {
+			background: rgba(0,0,0,0.7);
+			backdrop-filter: blur(4px);
+		}
+		.modal-head {
+			padding: 16px 20px;
+			border-bottom: 1px solid var(--border);
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			font-size: 14px;
+			font-weight: 600;
+		}
+		.modal-close {
+			background: transparent;
+			border: none;
+			color: var(--muted);
+			cursor: pointer;
+			font-size: 18px;
+			line-height: 1;
+		}
+		.modal-close:hover { color: var(--text); }
+		.modal-body {
+			padding: 20px;
+			display: flex;
+			flex-direction: column;
+			gap: 16px;
+		}
+		.form-group {
+			display: flex;
+			flex-direction: column;
+			gap: 6px;
+		}
+		.form-label {
+			font-family: var(--mono);
+			font-size: 11px;
+			color: var(--muted-2);
+			text-transform: uppercase;
+			letter-spacing: .5px;
+		}
+		.form-control {
+			background: rgba(255,255,255,0.03);
+			border: 1px solid var(--border);
+			border-radius: var(--r-sm);
+			color: var(--text);
+			font-family: var(--sans);
+			font-size: 13px;
+			padding: 8px 12px;
+			width: 100%;
+			outline: none;
+			transition: border-color .15s, background .15s;
+		}
+		.form-control:focus {
+			border-color: rgba(255,255,255,0.28);
+			background: rgba(255,255,255,0.06);
+		}
+		.form-control::file-selector-button {
+			background: rgba(255,255,255,0.05);
+			border: 1px solid var(--border);
+			color: var(--text);
+			padding: 4px 8px;
+			border-radius: var(--r-sm);
+			cursor: pointer;
+			font-family: var(--sans);
+			font-size: 12px;
+			font-weight: 500;
+			margin-right: 12px;
+		}
+		.form-control option {
+			background: var(--bg-card);
+			color: var(--text);
+		}
+		.modal-foot {
+			padding: 16px 20px;
+			border-top: 1px solid var(--border);
+			display: flex;
+			justify-content: flex-end;
+			gap: 10px;
+		}
+
+		/* ── ALERTS ───────────────────────────────────────────────── */
+		.alert {
+			padding: 10px 14px;
+			border-radius: var(--r-sm);
+			margin-bottom: 20px;
+			font-size: 13px;
+		}
+		.alert-error {
+			background: rgba(239, 68, 68, 0.1);
+			border: 1px solid rgba(239, 68, 68, 0.2);
+			color: #ef4444;
+		}
+		.alert-success {
+			background: rgba(34, 197, 94, 0.1);
+			border: 1px solid rgba(34, 197, 94, 0.2);
+			color: #22c55e;
+		}
 	</style>
 </head>
 
@@ -1025,12 +1144,20 @@ $default_logo = 'logos/hub-mark.svg';
 				</div>
 
 				<button class="btn btn-ghost" id="toggleCollapse" style="display:none">Collapse</button>
+				<button class="btn btn-lime" id="btnNewProject">New Project</button>
 				<a class="btn btn-lime" href="<?= h($dash_url) ?>">XAMPP</a>
 				<a class="btn btn-ghost" href="<?= h($phpmyadmin_url) ?>" target="_blank"
 					rel="noreferrer">phpMyAdmin</a>
 				<button class="btn btn-ghost" id="toggleDash">Embedded</button>
 			</div>
 		</header>
+
+		<?php if (!empty($_GET['error'])): ?>
+			<div class="alert alert-error"><?= h($_GET['error']) ?></div>
+		<?php endif; ?>
+		<?php if (!empty($_GET['success'])): ?>
+			<div class="alert alert-success">Project created successfully!</div>
+		<?php endif; ?>
 
 		<!-- GRID -->
 		<div class="groups" id="grid">
@@ -1122,6 +1249,56 @@ $default_logo = 'logos/hub-mark.svg';
 				<iframe src="<?= h($dash_url) ?>" loading="lazy" referrerpolicy="no-referrer"></iframe>
 			</div>
 		</div>
+
+		<!-- MODAL: NEW PROJECT -->
+		<dialog id="modalNewProject" class="modal">
+			<form action="api_create.php" method="POST" enctype="multipart/form-data">
+				<div class="modal-head">
+					<span>Create New Project</span>
+					<button type="button" class="modal-close" id="btnCloseProject">&times;</button>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label class="form-label">Folder Name <span style="color:#ef4444">*</span></label>
+						<input type="text" name="folder_name" class="form-control" placeholder="my-awesome-project" pattern="[a-zA-Z0-9_\-]+" title="Only letters, numbers, hyphens, and underscores" required>
+					</div>
+					<div class="form-group">
+						<label class="form-label">Title <span style="color:#ef4444">*</span></label>
+						<input type="text" name="title" class="form-control" placeholder="Project Title" required>
+					</div>
+					<div class="form-group">
+						<label class="form-label">Description</label>
+						<textarea name="description" class="form-control" rows="2" placeholder="Brief description..."></textarea>
+					</div>
+					<div class="form-group">
+						<label class="form-label">Group</label>
+						<input type="text" name="group" class="form-control" list="groupList" placeholder="Select or type new...">
+						<datalist id="groupList">
+							<?php foreach ($all_groups as $g): ?>
+								<option value="<?= h($g) ?>"></option>
+							<?php endforeach; ?>
+						</datalist>
+					</div>
+					<div class="form-group">
+						<label class="form-label">Logo</label>
+						<input type="file" name="logo" class="form-control" accept="image/*">
+					</div>
+					<div class="form-group">
+						<label class="form-label">Create From</label>
+						<select name="create_from" class="form-control" style="appearance:none">
+							<option value="">-- Empty Directory --</option>
+							<?php foreach ($projects as $dir): ?>
+								<option value="<?= h($dir) ?>"><?= h($dir) ?></option>
+							<?php endforeach; ?>
+						</select>
+					</div>
+				</div>
+				<div class="modal-foot">
+					<button type="button" class="btn btn-ghost" id="btnCancelProject">Cancel</button>
+					<button type="submit" class="btn btn-lime">Create Project</button>
+				</div>
+			</form>
+		</dialog>
 
 		<div class="foot">
 			<div class="foot-tip">
@@ -1303,6 +1480,12 @@ $default_logo = 'logos/hub-mark.svg';
 
 			$td.addEventListener('click', () => { $dp.style.display = ''; $dp.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
 			$cd.addEventListener('click', () => { $dp.style.display = 'none'; });
+
+			const modalNewProject = document.getElementById('modalNewProject');
+			document.getElementById('btnNewProject').addEventListener('click', () => modalNewProject.showModal());
+			const closeMdl = () => modalNewProject.close();
+			document.getElementById('btnCloseProject').addEventListener('click', closeMdl);
+			document.getElementById('btnCancelProject').addEventListener('click', closeMdl);
 
 			syncPins(); render();
 		})();
